@@ -28,7 +28,10 @@ INSTALLED_APPS = [
 
     'rest_framework',
 
-    'shop',
+    'OnlineShopBackEnd.shop',
+    'OnlineShopBackEnd.products',
+    'OnlineShopBackEnd.shop_basket',
+
 ]
 
 MIDDLEWARE = [
@@ -68,8 +71,12 @@ WSGI_APPLICATION = 'OnlineShopBackEnd.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'online_shop',
+        'USER': 'postgres-user',
+        'PASSWORD': 'password',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
     }
 }
 

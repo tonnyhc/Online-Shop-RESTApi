@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class ShopConfig(AppConfig):
+class ShopBasketConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'shop'
+    name = 'OnlineShopBackEnd.shop_basket'
