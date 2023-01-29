@@ -1,5 +1,3 @@
-from enum import Enum
-
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import UserManager, PermissionsMixin
 from django.contrib.auth.validators import ASCIIUsernameValidator
@@ -11,7 +9,6 @@ from django.utils import timezone
 from django.utils.datetime_safe import datetime
 
 from OnlineShopBackEnd.accounts.utils.mixins import Gender
-from OnlineShopBackEnd.products.mixins import ChoicesEnumMixin
 
 
 class AppUser(AbstractBaseUser, PermissionsMixin):
@@ -63,8 +60,8 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     EMAIL_FIELD = "email"
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["username"]
+    USERNAME_FIELD = "username"
+    REQUIRED_FIELDS = ["email"]
 
     class Meta:
         verbose_name = "user"
@@ -125,6 +122,10 @@ class UserInfo(models.Model):
         blank=True,
         null=True,
     )
+
+    class Meta:
+        verbose_name = "user info"
+        verbose_name_plural = 'users info'
 
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}"

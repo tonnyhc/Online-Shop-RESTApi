@@ -4,6 +4,7 @@ from OnlineShopBackEnd.products.mixins import CategoryEnumMixin
 
 class Product(models.Model):
     MAX_LEN_TITLE = 155
+    MAX_LEN_PRODUCT_ID = 25
 
     title = models.CharField(
         max_length=MAX_LEN_TITLE,
@@ -15,7 +16,9 @@ class Product(models.Model):
         null=False,
         blank=False,
     )
-    product_id = models.IntegerField(
+    product_id = models.CharField(
+        max_length=MAX_LEN_PRODUCT_ID,
+        unique=True,
         null=False,
         blank=False,
     )
