@@ -13,6 +13,9 @@ SECRET_KEY = 'django-insecure-!2e2l0l&&v3q@-%o+xp4^2@%cq1uw=*)h1u_!j4rdy5!cfo-_k
 DEBUG = True
 
 ALLOWED_HOSTS = []
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+]
 
 # Application definition
 
@@ -26,6 +29,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework.authtoken',
+    "corsheaders",
 
     'OnlineShopBackEnd.shop',
     'OnlineShopBackEnd.products',
@@ -37,6 +41,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

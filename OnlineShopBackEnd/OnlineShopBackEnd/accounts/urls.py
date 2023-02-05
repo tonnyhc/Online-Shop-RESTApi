@@ -1,5 +1,5 @@
 from django.urls import path
-from OnlineShopBackEnd.shop.views import SignUpView, SignInView, SignOutView
+from OnlineShopBackEnd.accounts.views import SignUpView, SignInView, SignOutView
 
 
 urlpatterns = [

@@ -1,7 +1,5 @@
-from django.contrib import auth
 from django.contrib.auth import get_user_model, password_validation
 from rest_framework import serializers, exceptions
-from rest_framework.exceptions import AuthenticationFailed
 
 UserModel = get_user_model()
 class SignUpSerializer(serializers.ModelSerializer):

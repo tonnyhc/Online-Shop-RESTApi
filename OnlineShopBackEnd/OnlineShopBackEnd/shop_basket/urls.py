@@ -1,7 +1,7 @@
 from django.urls import path
 
-from OnlineShopBackEnd.shop_basket.views import basket_view
+from OnlineShopBackEnd.shop_basket.views import BasketView
 
 urlpatterns = [
-    path('', basket_view, name='basket_view')
+    path('<str:user>/', BasketView.as_view(), name='basket_view')
 ]
