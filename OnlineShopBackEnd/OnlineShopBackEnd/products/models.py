@@ -25,11 +25,18 @@ class ProductRating(models.Model):
 class Product(models.Model):
     MAX_LEN_TITLE = 155
     MAX_LEN_PRODUCT_ID = 25
+    MAX_LEN_MODEL = 155
 
     title = models.CharField(
         max_length=MAX_LEN_TITLE,
         null=False,
         blank=False,
+    )
+
+    model = models.CharField(
+        max_length=MAX_LEN_MODEL,
+        null=False,
+        blank=False
     )
 
     product_price = models.FloatField(
@@ -68,6 +75,9 @@ class Product(models.Model):
         if not self.slug:
             self.slug = self.generate_slug()
         return super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title + ' ' + self.product_id
 
 #This model is for the images for the products, because i want to have more than 1 image for a single product
 class ProductImage(models.Model):
