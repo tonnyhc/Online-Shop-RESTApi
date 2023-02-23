@@ -81,8 +81,7 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
 
 class UserInfo(models.Model):
     MAX_LEN_BIO = 50
-    MAX_LEN_FIRST_NAME = 50
-    MAX_LEN_LAST_NAME = 50
+    MAX_LEN_FULLNAME = 110
     MAX_LEN_ADDRESS = 200
     MAX_LEN_CITY = 100
     MAX_LEN_PHONE_NUMBER = 20
@@ -92,16 +91,12 @@ class UserInfo(models.Model):
         on_delete=models.CASCADE
     )
     # user names
-    first_name = models.CharField(
-        max_length=MAX_LEN_FIRST_NAME,
+    full_name = models.CharField(
+        max_length=MAX_LEN_FULLNAME,
         blank=True,
         null=True,
     )
-    last_name = models.CharField(
-        max_length=MAX_LEN_LAST_NAME,
-        blank=True,
-        null=True,
-    )
+
     # address info
     city = models.CharField(
         max_length=MAX_LEN_CITY,
@@ -126,9 +121,6 @@ class UserInfo(models.Model):
     class Meta:
         verbose_name = "user info"
         verbose_name_plural = 'users info'
-
-    def get_full_name(self):
-        return f"{self.first_name} {self.last_name}"
 
     @receiver(post_save, sender=AppUser)
     def create_user_profile(sender, instance, created, **kwargs):
