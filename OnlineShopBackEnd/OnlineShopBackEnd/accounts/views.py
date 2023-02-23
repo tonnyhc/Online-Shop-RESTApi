@@ -1,7 +1,8 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate, login
+from django.middleware.csrf import get_token
 from rest_framework.authtoken import views as authtoken_views
 from rest_framework.authtoken import models as authtoken_models
-from rest_framework import generics as rest_generic_views, views as rest_views
+from rest_framework import generics as rest_generic_views, views as rest_views, status
 from rest_framework.response import Response
 
 from OnlineShopBackEnd.accounts.serializers import SignUpSerializer
@@ -13,6 +14,24 @@ class SignUpView(rest_generic_views.CreateAPIView):
     queryset = UserModel.objects.all()
     serializer_class = SignUpSerializer
 
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+
+        user = serializer.save()
+        username = serializer.validated_data.get('username')
+        password = serializer.validated_data.get('password')
+        user = authenticate(username=username, password=password)
+
+        if user:
+            login(request, user)
+            token, created = authtoken_models.Token.objects.get_or_create(user=user)
+            return Response({
+                'token': token.key,
+                'user_id': user.pk,
+                'username': user.username
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class SignInView(authtoken_views.ObtainAuthToken):
     def post(self, request, *args, **kwargs):

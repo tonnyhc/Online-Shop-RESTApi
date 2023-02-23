@@ -27,7 +27,7 @@ class Product(models.Model):
     MAX_LEN_PRODUCT_ID = 25
     MAX_LEN_MODEL = 155
 
-    title = models.CharField(
+    brand = models.CharField(
         max_length=MAX_LEN_TITLE,
         null=False,
         blank=False,
@@ -42,6 +42,10 @@ class Product(models.Model):
     product_price = models.FloatField(
         null=False,
         blank=False,
+    )
+    discounted_price = models.FloatField(
+        null=True,
+        blank=True
     )
     product_id = models.CharField(
         max_length=MAX_LEN_PRODUCT_ID,
@@ -65,11 +69,15 @@ class Product(models.Model):
         blank=True,
         null=True,
     )
+    image = models.URLField(
+        blank=True,
+        null=True,
+    )
 
     #This 2 are for the slug field. The first one generates the slug out of title and product_id
     #The save method just saves the model with the populated slug_field
     def generate_slug(self):
-        return slugify(f"{self.title}-{self.product_id}")
+        return slugify(f"{self.brand}-{self.product_id}")
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -77,14 +85,14 @@ class Product(models.Model):
         return super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.title + ' ' + self.product_id
+        return self.brand + ' ' + self.product_id
 
 #This model is for the images for the products, because i want to have more than 1 image for a single product
-class ProductImage(models.Model):
-    product = models.ForeignKey(
-        Product,
-        on_delete=models.CASCADE,
-        related_name='images'
-    )
-    #TODO: make the image field and ImageField and upload it to some cloud
-    image = models.URLField()
+# class ProductImage(models.Model):
+#     product = models.ForeignKey(
+#         Product,
+#         on_delete=models.CASCADE,
+#         related_name='images'
+#     )
+#     #TODO: make the image field and ImageField and upload it to some cloud
+#     image = models.URLField()

@@ -24,7 +24,6 @@ class ProductSerializer(serializers.ModelSerializer):
         return None
 
     def to_representation(self, instance):
-        print('5')
         ratings = instance.ratings.all()
         scores = [rating.score for rating in ratings]
         instance.average_rating = sum(scores) / len(scores) if scores else None

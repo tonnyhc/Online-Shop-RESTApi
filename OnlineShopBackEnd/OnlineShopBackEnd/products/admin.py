@@ -1,18 +1,18 @@
 from django.contrib import admin
 
-from OnlineShopBackEnd.products.models import Product, ProductRating, ProductImage
+from OnlineShopBackEnd.products.models import Product, ProductRating
 
 
-class ProductImageInline(admin.TabularInline):
-    model = ProductImage
-    extra = 1
+# class ProductImageInline(admin.TabularInline):
+#     model = ProductImage
+#     extra = 1
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    inlines = [ProductImageInline]
+    # inlines = [ProductImageInline]
     exclude = ('ratings', )
     list_display = [
-        'title', 'product_id', 'product_price', 'category', 'slug'
+        'brand', 'model', 'product_id', 'product_price', 'category', 'slug'
     ]
 
 @admin.register(ProductRating)
