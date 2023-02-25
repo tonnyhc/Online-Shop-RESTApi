@@ -66,8 +66,6 @@ class Product(models.Model):
     ratings = models.ManyToManyField(
         ProductRating,
         related_name='products',
-        blank=True,
-        null=True,
     )
     image = models.URLField(
         blank=True,
