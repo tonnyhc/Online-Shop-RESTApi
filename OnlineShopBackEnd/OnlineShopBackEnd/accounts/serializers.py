@@ -32,11 +32,11 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 """This serializer was for use when the required field for login was the email, but it throwed some errors so i changed it to username
     can try fixing it later on """
-# class LoginSerializer(serializers.ModelSerializer):
-#     email = serializers.EmailField(max_length=255, min_length=3)
-#     password = serializers.CharField(max_length=68, min_length=6, write_only=True)
+# class LoginSerializer(serializers.py.ModelSerializer):
+#     email = serializers.py.EmailField(max_length=255, min_length=3)
+#     password = serializers.py.CharField(max_length=68, min_length=6, write_only=True)
 #
-#     # tokens = serializers.SerializerMethodField()
+#     # tokens = serializers.py.SerializerMethodField()
 #     #
 #     # def get_tokens(self, obj):
 #     #     user = UserModel.objects.get(email=obj['email'])

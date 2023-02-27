@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.core import validators
 from django.db import models
 
+from OnlineShopBackEnd.products.models import Product
+
 UserModel = get_user_model()
 
 
@@ -15,6 +17,7 @@ class Order(models.Model):
     MIN_LEN_ADDRESS = 3
     MAX_LEN_POST_CODE = 5
     MIN_LEN_POST_CODE = 4
+    MAX_DIGIT_TOTAL_PRICE = 10
 
     user = models.ForeignKey(
         UserModel,
@@ -49,4 +52,36 @@ class Order(models.Model):
             validators.MinLengthValidator(MIN_LEN_POST_CODE),
             validators.integer_validator
         ]
+    )
+
+    order_date = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    total_price = models.FloatField(
+        default=0
+    )
+
+
+
+
+
+
+
+class OrderItem(models.Model):
+    MAX_DIGITS_PRICE = 10
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE
+    )
+
+    quantity = models.IntegerField()
+
+    price = models.FloatField()
+
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name='items'
     )
