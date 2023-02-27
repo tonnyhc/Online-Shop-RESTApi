@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import generics as rest_generic_views, status
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.authtoken import models as authtoken_models
 
@@ -34,6 +35,7 @@ class BasketView(rest_generic_views.RetrieveAPIView):
 
 class CreateBasketItemAndAddToBasket(rest_generic_views.CreateAPIView):
     authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     queryset = BasketItem.objects.all()
     basket = Basket.objects.all()
@@ -48,18 +50,9 @@ class CreateBasketItemAndAddToBasket(rest_generic_views.CreateAPIView):
             })
 
         try:
-            # request_user = UserModel.objects.filter(username=request.data['user']).get()
-            token = self.request.headers.get('Authorization').split(' ')[1]
-            request_user = authtoken_models.Token.objects.get(key=token).user
-        except ObjectDoesNotExist:
-            return Response({
-                'message': "The user does not exist"
-            })
-
-        try:
-            basket = Basket.objects.filter(user=request_user).get()
+            basket = Basket.objects.filter(user=request.user).get()
         except Basket.DoesNotExist:
-            basket = Basket.objects.create(user=request_user)
+            basket = Basket.objects.create(user=request.user)
 
         try:
             basket_item = BasketItem.objects.filter(product=product, basket=basket).get()
@@ -82,6 +75,7 @@ class CreateBasketItemAndAddToBasket(rest_generic_views.CreateAPIView):
 
 class RemoveBasketItemFromBasket(rest_generic_views.DestroyAPIView):
     authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     serializer_class = BasketItemSerializer
     queryset = BasketItem.objects.all()
@@ -89,11 +83,8 @@ class RemoveBasketItemFromBasket(rest_generic_views.DestroyAPIView):
 
     def destroy(self, request, *args, **kwargs):
         try:
-            token = self.request.headers.get('Authorization').split(' ')[1]
-            request_user = authtoken_models.Token.objects.get(key=token).user
-            basket = Basket.objects.get(user=request_user)
+            basket = Basket.objects.get(user=request.user)
             product = Product.objects.get(slug=self.request.data['product'])
-            print(self.queryset.get(basket=basket, product=product))
             item = self.queryset.get(basket=basket, product=product)
 
             self.perform_destroy(item)
@@ -111,4 +102,5 @@ class RemoveBasketItemFromBasket(rest_generic_views.DestroyAPIView):
     }
     and must include the user token
     and the csrf_token
+    in the Headers
     """

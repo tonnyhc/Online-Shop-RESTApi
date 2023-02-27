@@ -1,5 +1,8 @@
 from django.contrib.auth import get_user_model
 from rest_framework import exceptions as rest_exceptions, generics as rest_generic_views, status
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+
 from OnlineShopBackEnd.products.models import Product, ProductRating
 from OnlineShopBackEnd.products.serializers import ProductSerializer, ProductRatingSerializer
 
@@ -32,6 +35,9 @@ class ProductDetailsView(rest_generic_views.RetrieveAPIView):
 
 
 class ProductRateView(rest_generic_views.CreateAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     queryset = Product.objects.all()
     serializer_class = ProductRatingSerializer
 
@@ -48,23 +54,22 @@ class ProductRateView(rest_generic_views.CreateAPIView):
 
         #Checks if the user exists otherwise or the user is logged in otherwise raises ValidationError
         #TODO: check if the user is logged in
-        try:
-            user = UserModel.objects.get(username=rating_data['user'])
-        except UserModel.DoesNotExist:
-            error_message = {
-                "message": "Can not give rating to a product because that user does not exist or is not logged in!"}
-            raise rest_exceptions.ValidationError(error_message, code=status.HTTP_400_BAD_REQUEST)
+        # try:
+        #     user = UserModel.objects.get(username=rating_data['user'])
+        # except UserModel.DoesNotExist:
+        #     error_message = {
+        #         "message": "Can not give rating to a product because that user does not exist or is not logged in!"}
+        #     raise rest_exceptions.ValidationError(error_message, code=status.HTTP_400_BAD_REQUEST)
 
         #Checking if the user is rated the same product, if so raises ValidationError
-        if ProductRating.objects.filter(user=user, products=product).exists():
+        if ProductRating.objects.filter(user=self.request.user, products=product).exists():
             error_message = {"message": "Can not give rating to a product because that user has already rated it!"}
             raise rest_exceptions.ValidationError(error_message, code=status.HTTP_400_BAD_REQUEST)
 
         serializer.is_valid(raise_exception=True)
-        rating = serializer.save(user=user)
+        rating = serializer.save(user=self.request.user)
         rating.products.add(product)
         # This is only a post request that requires data in the following format:
         # {
-        #     "user": "{username}",
         #     "score": "{0 to 5 delimiter 0.5}"
         # }
