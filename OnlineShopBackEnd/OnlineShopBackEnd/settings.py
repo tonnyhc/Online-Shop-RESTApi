@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'OnlineShopBackEnd.products',
     'OnlineShopBackEnd.shop_basket',
     'OnlineShopBackEnd.accounts',
+    'OnlineShopBackEnd.orders',
 
 ]
 

@@ -83,7 +83,7 @@ class Product(models.Model):
         return super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.brand + ' ' + self.product_id
+        return self.brand + ' ' + self.model
 
 #This model is for the images for the products, because i want to have more than 1 image for a single product
 # class ProductImage(models.Model):

@@ -114,6 +114,7 @@ class Basket(models.Model):
     def total_cost(self):
         return sum(item.total_cost() for item in self.basketitem_set.all())
 
+
     def order(self):
         self.is_ordered = True
         self.order_date = timezone.now()
@@ -144,10 +145,13 @@ class BasketItem(models.Model):
 
     def __str__(self):
         return f"Item total: {self.quantity * self.product.product_price} (Quantity :{self.quantity}\
-        , Price: {self.product.product_price}  - Product: {self.product.title})"
+        , Price: {self.product.product_price}  - Product: {self.product.brand} {self.product.model})"
 
     def subtotal(self):
-        total = self.quantity * self.product.product_price
+        if self.product.discounted_price:
+            total = self.product.discounted_price * self.quantity
+        else:
+            total = self.quantity * self.product.product_price
 
         if total is None:
             total = 0

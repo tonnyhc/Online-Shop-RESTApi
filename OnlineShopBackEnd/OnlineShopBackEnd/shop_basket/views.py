@@ -1,13 +1,14 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework import generics as rest_generic_views
+from rest_framework import generics as rest_generic_views, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from rest_framework.authtoken import models as authtoken_models
 
 from OnlineShopBackEnd.products.models import Product
 from OnlineShopBackEnd.shop_basket.models import Basket, BasketItem
-from OnlineShopBackEnd.shop_basket.serializers import BasketSerializer, CreateBasketItemAndAddToBasketSerializer
+from OnlineShopBackEnd.shop_basket.serializers import BasketSerializer, CreateBasketItemAndAddToBasketSerializer, \
+    BasketItemSerializer
 
 UserModel = get_user_model()
 
@@ -71,6 +72,43 @@ class CreateBasketItemAndAddToBasket(rest_generic_views.CreateAPIView):
                 basket=basket,
             )
 
+        serializer = self.get_serializer(basket_item)
+
         return Response({
+            'item': serializer.data,
             'message': "Product successfully added to basket"
-        })
+        }, status=status.HTTP_201_CREATED)
+
+
+class RemoveBasketItemFromBasket(rest_generic_views.DestroyAPIView):
+    authentication_classes = [TokenAuthentication]
+
+    serializer_class = BasketItemSerializer
+    queryset = BasketItem.objects.all()
+
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            token = self.request.headers.get('Authorization').split(' ')[1]
+            request_user = authtoken_models.Token.objects.get(key=token).user
+            basket = Basket.objects.get(user=request_user)
+            product = Product.objects.get(slug=self.request.data['product'])
+            print(self.queryset.get(basket=basket, product=product))
+            item = self.queryset.get(basket=basket, product=product)
+
+            self.perform_destroy(item)
+            return Response({
+                'message': "Product deleted from basket successfully!"
+            })
+        except ObjectDoesNotExist:
+            return Response({
+                'message': "There was a problem deleting the product from your basket!"
+            })
+    """
+    This view expects a 'DELETE' method with body 
+    {
+        'product': <product_slug>
+    }
+    and must include the user token
+    and the csrf_token
+    """
