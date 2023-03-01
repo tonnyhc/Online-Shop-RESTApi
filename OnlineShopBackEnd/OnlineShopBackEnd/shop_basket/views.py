@@ -1,7 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework import generics as rest_generic_views, status
+
+from rest_framework import generics as rest_generic_views, views as rest_views, status
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.authtoken import models as authtoken_models
@@ -80,7 +82,6 @@ class RemoveBasketItemFromBasket(rest_generic_views.DestroyAPIView):
     serializer_class = BasketItemSerializer
     queryset = BasketItem.objects.all()
 
-
     def destroy(self, request, *args, **kwargs):
         try:
             basket = Basket.objects.get(user=request.user)
@@ -95,6 +96,7 @@ class RemoveBasketItemFromBasket(rest_generic_views.DestroyAPIView):
             return Response({
                 'message': "There was a problem deleting the product from your basket!"
             })
+
     """
     This view expects a 'DELETE' method with body 
     {
@@ -104,3 +106,37 @@ class RemoveBasketItemFromBasket(rest_generic_views.DestroyAPIView):
     and the csrf_token
     in the Headers
     """
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def update_basket_item_quantity(request, slug):
+    user = request.user
+    basket = Basket.objects.get(user=user)
+
+    try:
+        basket_item = BasketItem.objects.filter(basket=basket, product__slug=slug).get()
+    except BasketItem.DoesNotExist:
+        return Response({
+            'message': "Can't update quantity as the basket item seems not to exist!"
+        })
+
+    try:
+        action = request.data.get('action').split(' ')[0]
+        value = int(request.data.get('action').split(' ')[1])
+        if action == "+":
+            basket_item.quantity += value
+        elif action == '-' and basket_item.quantity > 1:
+            basket_item.quantity -= value
+        basket_item.save()
+    except Exception:
+        return Response({
+            'message': "An error occurred please try again later."
+        })
+
+    serializer = BasketItemSerializer(basket_item)
+
+    return Response({
+        'basket_item': serializer.data
+    })

@@ -25,10 +25,14 @@ class Order(models.Model):
     )
 
     full_name = models.CharField(
+        blank=False,
+        null=False,
         max_length=MAX_LEN_FULL_NAME
     )
 
     phone_number = models.CharField(
+        blank=False,
+        null=False,
         max_length=MAX_LEN_PHONE_NUMBER,
         validators=[
             validators.MinLengthValidator(MIN_LEN_PHONE_NUMBER),
@@ -37,16 +41,22 @@ class Order(models.Model):
     )
 
     town = models.CharField(
+        blank=False,
+        null=False,
         max_length=MAX_LEN_TOWN_NAME,
         validators=[validators.MinLengthValidator(MIN_LEN_TOWN_NAME)]
     )
 
     address = models.CharField(
+        blank=False,
+        null=False,
         max_length=MAX_LEN_ADDRESS,
         validators=[validators.MinLengthValidator(MIN_LEN_ADDRESS)]
     )
 
     post_code = models.CharField(
+        blank=False,
+        null=False,
         max_length=MAX_LEN_POST_CODE,
         validators=[
             validators.MinLengthValidator(MIN_LEN_POST_CODE),
@@ -59,14 +69,10 @@ class Order(models.Model):
     )
 
     total_price = models.FloatField(
-        default=0
+        default=0,
+        blank=False,
+        null=False
     )
-
-
-
-
-
-
 
 class OrderItem(models.Model):
     MAX_DIGITS_PRICE = 10
@@ -76,9 +82,16 @@ class OrderItem(models.Model):
         on_delete=models.CASCADE
     )
 
-    quantity = models.IntegerField()
+    quantity = models.IntegerField(
+        default=1,
+        blank=False,
+        null=False
+    )
 
-    price = models.FloatField()
+    price = models.FloatField(
+        blank=False,
+        null=False
+    )
 
     order = models.ForeignKey(
         Order,

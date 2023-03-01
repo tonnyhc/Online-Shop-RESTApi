@@ -22,6 +22,16 @@ class ProductRating(models.Model):
     )
 
 
+class Category(models.Model):
+    category = models.CharField(
+        max_length=20
+    )
+
+    def __str__(self):
+        return self.category
+
+
+# TODO: must add a quantity
 class Product(models.Model):
     MAX_LEN_TITLE = 155
     MAX_LEN_PRODUCT_ID = 25
@@ -59,9 +69,14 @@ class Product(models.Model):
     quantity = models.PositiveIntegerField(
         default=0,
     )
-    category = models.CharField(
-        choices=CategoryEnumMixin.choices(),
-        max_length=CategoryEnumMixin.max_len(),
+    # category = models.CharField(
+    #     choices=CategoryEnumMixin.choices(),
+    #     max_length=CategoryEnumMixin.max_len(),
+    # )
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.RESTRICT,
+
     )
     ratings = models.ManyToManyField(
         ProductRating,
@@ -72,8 +87,8 @@ class Product(models.Model):
         null=True,
     )
 
-    #This 2 are for the slug field. The first one generates the slug out of title and product_id
-    #The save method just saves the model with the populated slug_field
+    # This 2 are for the slug field. The first one generates the slug out of title and product_id
+    # The save method just saves the model with the populated slug_field
     def generate_slug(self):
         return slugify(f"{self.brand}-{self.product_id}")
 
@@ -85,7 +100,7 @@ class Product(models.Model):
     def __str__(self):
         return self.brand + ' ' + self.model
 
-#This model is for the images for the products, because i want to have more than 1 image for a single product
+# This model is for the images for the products, because i want to have more than 1 image for a single product
 # class ProductImage(models.Model):
 #     product = models.ForeignKey(
 #         Product,

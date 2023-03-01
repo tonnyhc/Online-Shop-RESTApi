@@ -4,6 +4,6 @@ from OnlineShopBackEnd.products.views import ProductsListView, ProductDetailsVie
 
 urlpatterns = [
     path('', ProductsListView.as_view(), name='products list'),
-    path('<str:slug>', ProductDetailsView.as_view(), name='product details'),
-    path('<str:slug>/rate', ProductRateView.as_view(), name='product rate'),
+    path('<str:slug>/', ProductDetailsView.as_view(), name='product details'),
+    path('<str:slug>/rate/', ProductRateView.as_view(), name='product rate'),
 ]

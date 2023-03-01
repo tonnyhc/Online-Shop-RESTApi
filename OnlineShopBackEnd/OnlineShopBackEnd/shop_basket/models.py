@@ -123,6 +123,8 @@ class Basket(models.Model):
     def __str__(self):
         return f'Basket {self.id}'
 
+
+# TODO: when user adds item to basket must save its quantity for no more that 5 minutes!
 class BasketItem(models.Model):
     product = models.ForeignKey(
         Product,

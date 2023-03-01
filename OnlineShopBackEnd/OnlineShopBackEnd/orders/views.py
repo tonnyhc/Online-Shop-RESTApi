@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from OnlineShopBackEnd.orders.models import Order, OrderItem
 from OnlineShopBackEnd.orders.serializers import CreateOrderSerializer
 from OnlineShopBackEnd.products.models import Product
+from OnlineShopBackEnd.shop_basket.models import Basket
 
 
 class CreateOrder(rest_generic_views.CreateAPIView):
@@ -15,6 +16,7 @@ class CreateOrder(rest_generic_views.CreateAPIView):
     queryset = Order.objects.all()
     serializer_class = CreateOrderSerializer
 
+    # TODO: when order is created must reduce the quantity of every single item
     def post(self, request, *args, **kwargs):
         order = Order.objects.create(
             user=request.user,
@@ -47,6 +49,9 @@ class CreateOrder(rest_generic_views.CreateAPIView):
         OrderItem.objects.bulk_create(item_objects)
         order.total_price = sum(item.price for item in item_objects)
         order.save()
+
+        basket = Basket.objects.get(user=request.user)
+        basket.delete()
 
         serializer = self.get_serializer(order)
 
