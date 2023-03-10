@@ -3,7 +3,7 @@ from django.core import validators
 from django.db import models
 from django.utils.text import slugify
 
-from OnlineShopBackEnd.products.mixins import CategoryEnumMixin
+from OnlineShopBackEnd.products.mixins import CategoryEnumMixin, GenderEnumMixin
 
 UserModel = get_user_model()
 
@@ -69,10 +69,7 @@ class Product(models.Model):
     quantity = models.PositiveIntegerField(
         default=0,
     )
-    # category = models.CharField(
-    #     choices=CategoryEnumMixin.choices(),
-    #     max_length=CategoryEnumMixin.max_len(),
-    # )
+
     category = models.ForeignKey(
         Category,
         on_delete=models.RESTRICT,
@@ -85,6 +82,10 @@ class Product(models.Model):
     image = models.URLField(
         blank=True,
         null=True,
+    )
+    gender = models.CharField(
+        choices=GenderEnumMixin.choices(),
+        max_length=GenderEnumMixin.max_len()
     )
 
     # This 2 are for the slug field. The first one generates the slug out of title and product_id

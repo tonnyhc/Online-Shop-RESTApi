@@ -1,7 +1,11 @@
 from django.contrib.auth import get_user_model, password_validation
 from rest_framework import serializers, exceptions
 
+from OnlineShopBackEnd.accounts.models import UserInfo
+
 UserModel = get_user_model()
+
+
 class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
@@ -29,6 +33,23 @@ class SignUpSerializer(serializers.ModelSerializer):
         user_representation = super().to_representation(instance)
         user_representation.pop('password')
         return user_representation
+
+
+class AccountInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserInfo
+        fields = '__all__'
+
+
+class AccountDetailsSerializer(serializers.ModelSerializer):
+    userinfo = AccountInfoSerializer()
+
+    class Meta:
+        model = UserModel
+        exclude = ('password',)
+
+
+
 
 """This serializer was for use when the required field for login was the email, but it throwed some errors so i changed it to username
     can try fixing it later on """

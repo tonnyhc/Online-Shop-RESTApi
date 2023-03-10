@@ -16,3 +16,8 @@ class CategoryEnumMixin(ChoicesEnumMixin, Enum):
     Prism = "Prism"
     Lens = "Lens"
     Cases = "Cases"
+
+class GenderEnumMixin(ChoicesEnumMixin, Enum):
+    Man = 'Man'
+    Woman = 'Woman'
+    Unisex = 'Unisex'

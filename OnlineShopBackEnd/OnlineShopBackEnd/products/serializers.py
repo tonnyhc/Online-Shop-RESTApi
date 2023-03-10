@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from OnlineShopBackEnd.products.models import Product, ProductRating
+from OnlineShopBackEnd.products.models import Product, ProductRating, Category
 
 
 class ProductRatingSerializer(serializers.ModelSerializer):
@@ -11,10 +11,14 @@ class ProductRatingSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     average_rating = serializers.SerializerMethodField()
+    search = serializers.StringRelatedField()
 
     class Meta:
         model = Product
         exclude = ('ratings', )
+
+    def get_search(self, obj):
+        return str(obj.product)
 
     def get_average_rating(self, obj):
         ratings = obj.ratings.all()
@@ -28,6 +32,11 @@ class ProductSerializer(serializers.ModelSerializer):
         scores = [rating.score for rating in ratings]
         instance.average_rating = sum(scores) / len(scores) if scores else None
         return super().to_representation(instance)
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
 
 
 

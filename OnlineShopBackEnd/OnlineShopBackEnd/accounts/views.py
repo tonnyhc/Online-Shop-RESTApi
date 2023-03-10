@@ -1,11 +1,13 @@
 from django.contrib.auth import get_user_model, authenticate, login
-from django.middleware.csrf import get_token
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken import views as authtoken_views
 from rest_framework.authtoken import models as authtoken_models
 from rest_framework import generics as rest_generic_views, views as rest_views, status
+from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from OnlineShopBackEnd.accounts.serializers import SignUpSerializer
+from OnlineShopBackEnd.accounts.serializers import SignUpSerializer, AccountDetailsSerializer
 
 UserModel = get_user_model()
 
@@ -67,3 +69,16 @@ class SignOutView(rest_views.APIView):
             return Response({
                 'message': "No signed in user, cant perform sign-out!"
             })
+
+
+class AccountDetails(rest_generic_views.RetrieveAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = AccountDetailsSerializer
+    queryset = UserModel.objects.all()
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, username=self.request.user.username)
+
+        return obj

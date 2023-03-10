@@ -25,9 +25,7 @@ class BasketView(rest_generic_views.RetrieveAPIView):
 
     def get_object(self):
         try:
-            token = self.request.headers.get("Authorization").split(' ')[1]
-            request_user = authtoken_models.Token.objects.get(key=token).user
-            basket = self.queryset.get(user=request_user)
+            basket = self.queryset.get(user=self.request.user)
             return basket
 
         except Basket.DoesNotExist:

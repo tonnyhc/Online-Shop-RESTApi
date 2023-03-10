@@ -1,27 +1,32 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Q
+from django.db.models import Q, Avg
 from rest_framework import exceptions as rest_exceptions, generics as rest_generic_views, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from OnlineShopBackEnd.products.models import Product, ProductRating, Category
-from OnlineShopBackEnd.products.serializers import ProductSerializer, ProductRatingSerializer
+from OnlineShopBackEnd.products.serializers import ProductSerializer, ProductRatingSerializer, CategorySerializer
 
 UserModel = get_user_model()
 
 
 class ProductsListView(rest_generic_views.ListAPIView):
-    queryset = Product.objects.all()
+    queryset = Product.objects.annotate(avg_rating=Avg('ratings__score'))
     serializer_class = ProductSerializer
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        brand = self.request.query_params.get('brand')
-        model = self.request.query_params.get('model')
-        min_price = self.request.query_params.get('min-price')
-        max_price = self.request.query_params.get('max-price')
-        category_filter = self.request.query_params.get('category')
-        average_rating = self.request.query_params.get('average-rating')
+        params = self.request.query_params
+
+        search_query = params.get('search', None)
+        brands = params.get('brands')
+        model = params.get('model')
+        min_price = params.get('min-price')
+        max_price = params.get('max-price')
+        category_filter = params.get('category')
+        average_rating = params.get('average-rating')
+        gender = params.get('gender')
 
         try:
             min_price = float(min_price)
@@ -33,8 +38,22 @@ class ProductsListView(rest_generic_views.ListAPIView):
         except (TypeError, ValueError):
             max_price = None
 
-        if brand:
-            queryset = queryset.filter(brand=brand)
+        if search_query and search_query != '':
+            filtered_queryset = []
+            for product in self.queryset.all():
+                product_str = f'{product.brand} {product.model}'
+                if search_query.lower() in product_str.lower():
+                    filtered_queryset.append(product)
+            queryset = filtered_queryset
+
+        if brands and ',' in brands:
+            q_object = Q()
+            for brand in brands:
+                q_object |= Q(brand=brand)
+            queryset.filter(q_object)
+        elif brands:
+            queryset = queryset.filter(brand=brands)
+
         if model:
             queryset = queryset.filter(model=model)
         if min_price:
@@ -60,15 +79,48 @@ class ProductsListView(rest_generic_views.ListAPIView):
             queryset = queryset.filter(category=category)
 
         if average_rating:
-            queryset = queryset.filter(average_rating=average_rating)
+            queryset = queryset.filter(avg_rating__gte=float(average_rating))
+
+        if gender and ',' in gender:
+            q_object = Q()
+            gender = gender.split(',')
+            for g in gender:
+                q_object |= Q(gender=g)
+
+            queryset = queryset.filter(q_object)
+        elif gender:
+            queryset = queryset.filter(gender=gender)
 
         products = queryset
+        categories = Category.objects.filter(product__in=products).distinct()
 
         for product in products:
             ratings = product.ratings.all()
             scores = [rating.score for rating in ratings]
             product.average_rating = sum(scores) / len(scores) if scores else None
-        return products
+        serializer = ProductSerializer(products, many=True)
+
+        return serializer.data
+
+    def get_filters(self):
+        categories = Category.objects.all()
+        serializer = CategorySerializer(categories, many=True)
+
+        brands = Product.objects.values_list('brand', flat=True).distinct()
+        data = {
+            'categories': serializer.data,
+            'brands': brands
+        }
+        return data
+
+    def get(self, request, *args, **kwargs):
+        products = self.get_queryset()
+        filters = self.get_filters()
+        data = {
+            'products': products,
+            'query_filters': filters,
+        }
+        return Response(data)
 
 
 class ProductDetailsView(rest_generic_views.RetrieveAPIView):
