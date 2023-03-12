@@ -4,7 +4,7 @@ from OnlineShopBackEnd.products.mixins import ChoicesEnumMixin
 
 
 class Gender(ChoicesEnumMixin, Enum):
-    Male = 'Male'
-    Female = "Female"
+    Man = 'Man'
+    Woman = "Woman"
     DoNotShow = 'Do not show'
 

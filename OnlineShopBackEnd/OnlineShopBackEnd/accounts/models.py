@@ -14,6 +14,8 @@ from OnlineShopBackEnd.accounts.utils.mixins import Gender
 class AppUser(AbstractBaseUser, PermissionsMixin):
     MAX_LEN_USERNAME = 50
     MIN_LEN_USERNAME = 3
+    MAX_LEN_FULL_NAME = 50
+    MIN_LEN_FULL_NAME = 3
 
     username_validator = ASCIIUsernameValidator()
 
@@ -25,6 +27,13 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
         error_messages={
             "unique": "A user with that username already exists.",
         }
+    )
+    full_name = models.CharField(
+        max_length=MAX_LEN_FULL_NAME,
+        validators=[validators.MinLengthValidator(MIN_LEN_FULL_NAME),
+                    validators.RegexValidator(regex=r'^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.\'-]+$',
+                                              message="Please enter a valid full name!")]
+    #     TODO: Create a validator for the full_name to be only with letters
     )
 
     email = models.EmailField(
@@ -39,6 +48,8 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
         choices=Gender.choices(),
         max_length=Gender.max_len(),
     )
+
+    birth_year = models.DateField()
 
     is_staff = models.BooleanField(
         ("staff status"),

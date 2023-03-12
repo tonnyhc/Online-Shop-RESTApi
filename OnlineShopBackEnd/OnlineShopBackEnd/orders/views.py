@@ -4,7 +4,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from OnlineShopBackEnd.orders.models import Order, OrderItem
-from OnlineShopBackEnd.orders.serializers import CreateOrderSerializer
+from OnlineShopBackEnd.orders.serializers import CreateOrderSerializer, ListOrdersSerializer, OrderDetailsSerializer, \
+    EditOrderSerializer
 from OnlineShopBackEnd.products.models import Product
 from OnlineShopBackEnd.shop_basket.models import Basket
 
@@ -75,3 +76,26 @@ class CreateOrder(rest_generic_views.CreateAPIView):
     ]
 }
     """
+
+
+class OrdersList(rest_generic_views.ListAPIView):
+    queryset = Order.objects.all()
+    serializer_class = ListOrdersSerializer
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        orders = self.queryset.filter(user=user)
+
+        return Response(self.serializer_class(orders, many=True).data)
+
+
+class OrderDetails(rest_generic_views.RetrieveAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderDetailsSerializer
+
+
+class EditOrder(rest_generic_views.UpdateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = EditOrderSerializer
+
+

@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core import validators
 from django.db import models
 
+from OnlineShopBackEnd.orders.mixins import OrderStatusEnumMixin
 from OnlineShopBackEnd.products.models import Product
 
 UserModel = get_user_model()
@@ -73,6 +74,14 @@ class Order(models.Model):
         blank=False,
         null=False
     )
+
+    order_status = models.CharField(
+        choices=OrderStatusEnumMixin.choices(),
+        max_length=OrderStatusEnumMixin.max_len()
+    )
+
+
+
 
 class OrderItem(models.Model):
     MAX_DIGITS_PRICE = 10

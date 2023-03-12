@@ -7,7 +7,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from OnlineShopBackEnd.accounts.serializers import SignUpSerializer, AccountDetailsSerializer
+from OnlineShopBackEnd.accounts.serializers import SignUpSerializer, AccountDetailsSerializer, AccountEditSerializer
 
 UserModel = get_user_model()
 
@@ -82,3 +82,15 @@ class AccountDetails(rest_generic_views.RetrieveAPIView):
         obj = get_object_or_404(queryset, username=self.request.user.username)
 
         return obj
+
+
+class AccountEdit(rest_generic_views.UpdateAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = AccountEditSerializer
+    queryset = UserModel.objects.all()
+
+    def get_object(self):
+        queryset = self.queryset.filter(pk=self.request.user.pk)
+        user = queryset.first()
+        return user

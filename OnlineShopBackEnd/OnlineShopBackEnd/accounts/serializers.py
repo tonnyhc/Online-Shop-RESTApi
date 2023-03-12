@@ -9,7 +9,7 @@ UserModel = get_user_model()
 class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
-        fields = ('email', 'username', 'password', 'gender')
+        fields = ('email', 'username', 'password', 'gender', 'birth_year')
 
     def create(self, validated_data):
         user = super().create(validated_data)
@@ -43,12 +43,20 @@ class AccountInfoSerializer(serializers.ModelSerializer):
 
 class AccountDetailsSerializer(serializers.ModelSerializer):
     userinfo = AccountInfoSerializer()
+    orders_count = serializers.SerializerMethodField()
 
     class Meta:
         model = UserModel
         exclude = ('password',)
 
+    def get_orders_count(self, obj):
+        return obj.order_set.count()
 
+
+class AccountEditSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserModel
+        fields = ('birth_year', 'gender', 'full_name')
 
 
 """This serializer was for use when the required field for login was the email, but it throwed some errors so i changed it to username
