@@ -1,4 +1,4 @@
-from rest_framework import generics as rest_generic_views
+from rest_framework import generics as rest_generic_views, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -98,4 +98,34 @@ class EditOrder(rest_generic_views.UpdateAPIView):
     queryset = Order.objects.all()
     serializer_class = EditOrderSerializer
 
+    def put(self, request, *args, **kwargs):
+        order = self.queryset.filter(pk=kwargs['pk']).first()
+        if order.order_status != 'InPreparation':
+            return Response({
+                'message': "You can not edit your order, it is already shipped"
+            })
+        else:
+            return self.update(request, *args, **kwargs)
+
+class DeleteOrder(rest_generic_views.DestroyAPIView):
+    queryset = Order.objects.all()
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        order = self.queryset.filter(pk=kwargs['pk']).first()
+        user = request.user
+        if order.user != user:
+            return Response({
+                'message': "You can't delete orders that are not yours"
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        if order.order_status != "InPreparation":
+            return Response({
+                'message': "You can't cancel your order! It is already shipped."
+            }, status=status.HTTP_400_BAD_REQUEST)
+        self.destroy(request, *args, **kwargs)
+        return Response({
+            "message": "You have successfully canceled your order",
+        }, status=status.HTTP_204_NO_CONTENT)
 
