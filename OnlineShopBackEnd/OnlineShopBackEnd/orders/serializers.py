@@ -2,7 +2,8 @@ from rest_framework import serializers
 
 from datetime import datetime
 
-from OnlineShopBackEnd.orders.models import Order
+from OnlineShopBackEnd.orders.models import Order, OrderItem
+from OnlineShopBackEnd.products.serializers import ProductSerializer
 
 
 class CreateOrderSerializer(serializers.ModelSerializer):
@@ -11,10 +12,21 @@ class CreateOrderSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class OrderItemSerializer(serializers.ModelSerializer):
+    product = ProductSerializer()
+
+    class Meta:
+        model = OrderItem
+        fields = ('product',)
+
+
 class OrderDetailsSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True)
+
     class Meta:
         model = Order
-        fields = ('full_name', 'phone_number', 'town', 'address', 'post_code')
+        fields = ('full_name', 'phone_number', 'town', 'address', 'post_code', 'items')
+
 
 class EditOrderSerializer(serializers.ModelSerializer):
     class Meta:

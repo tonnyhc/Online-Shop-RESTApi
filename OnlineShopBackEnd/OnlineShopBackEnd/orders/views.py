@@ -92,6 +92,25 @@ class OrdersList(rest_generic_views.ListAPIView):
 class OrderDetails(rest_generic_views.RetrieveAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderDetailsSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            order = self.queryset.filter(pk=kwargs['pk']).get()
+        except Order.DoesNotExist:
+            return Response({
+                'message': "The order you are trying to view seems to not exist. You can contact us if this is a problem for you!"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        if order.user.pk != request.user.pk:
+            return Response({
+                "message": "You can only view your own orders"
+            }, status=status.HTTP_403_FORBIDDEN)
+        return self.retrieve(self, request, *args, **kwargs)
+
+
+
 
 
 class EditOrder(rest_generic_views.UpdateAPIView):

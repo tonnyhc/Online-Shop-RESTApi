@@ -77,7 +77,8 @@ class Order(models.Model):
 
     order_status = models.CharField(
         choices=OrderStatusEnumMixin.choices(),
-        max_length=OrderStatusEnumMixin.max_len()
+        max_length=OrderStatusEnumMixin.max_len(),
+        default='InPreparation'
     )
 
 
