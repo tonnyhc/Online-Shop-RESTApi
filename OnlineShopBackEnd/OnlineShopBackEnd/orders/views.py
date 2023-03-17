@@ -96,6 +96,7 @@ class OrderDetails(rest_generic_views.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
+
         try:
             order = self.queryset.filter(pk=kwargs['pk']).get()
         except Order.DoesNotExist:
@@ -116,9 +117,15 @@ class OrderDetails(rest_generic_views.RetrieveAPIView):
 class EditOrder(rest_generic_views.UpdateAPIView):
     queryset = Order.objects.all()
     serializer_class = EditOrderSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def put(self, request, *args, **kwargs):
         order = self.queryset.filter(pk=kwargs['pk']).first()
+        if order.user.pk != request.user.pk:
+            return Response({
+                'message': "You can only edit your own orders"
+            }, status=status.HTTP_403_FORBIDDEN)
         if order.order_status != 'InPreparation':
             return Response({
                 'message': "You can not edit your order, it is already shipped"

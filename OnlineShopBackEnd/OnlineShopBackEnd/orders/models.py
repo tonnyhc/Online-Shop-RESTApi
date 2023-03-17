@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth import get_user_model
 from django.core import validators
 from django.db import models
@@ -67,6 +69,12 @@ class Order(models.Model):
 
     order_date = models.DateTimeField(
         auto_now_add=True
+    )
+
+    # TODO: Make this when the order status is set to shipped to put on a shipping date
+    shipping_date = models.DateField(
+        blank=True,
+        null=True
     )
 
     total_price = models.FloatField(

@@ -9,13 +9,20 @@ class ProductRatingSerializer(serializers.ModelSerializer):
         fields = ('user', 'score')
         read_only_fields = ('user',)
 
+
+class ProductSerializerOrderDetails(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('brand', 'model', 'product_price', 'discounted_price', 'slug', 'image')
+
+
 class ProductSerializer(serializers.ModelSerializer):
     average_rating = serializers.SerializerMethodField()
     search = serializers.StringRelatedField()
 
     class Meta:
         model = Product
-        exclude = ('ratings', )
+        exclude = ('ratings',)
 
     def get_search(self, obj):
         return str(obj.product)
@@ -33,13 +40,8 @@ class ProductSerializer(serializers.ModelSerializer):
         instance.average_rating = sum(scores) / len(scores) if scores else None
         return super().to_representation(instance)
 
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'
-
-
-
-
-
-
