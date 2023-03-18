@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from OnlineShopBackEnd.orders.models import DiscountCode
 from OnlineShopBackEnd.shop_basket.models import Basket, BasketItem
 
 
@@ -34,13 +35,26 @@ class BasketItemSerializer(serializers.ModelSerializer):
         return obj.product.discounted_price
 
 
+class DiscountCodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DiscountCode
+        fields = ('code', 'discount')
+
+
 class BasketSerializer(serializers.ModelSerializer):
     basketitem_set = BasketItemSerializer(many=True)
+    discount = serializers.SerializerMethodField()
 
     class Meta:
         model = Basket
-        fields = ['id', 'user', 'created_at', 'updated_at', 'is_ordered', 'order_date', 'basketitem_set']
+        fields = ['id', 'user', 'created_at', 'updated_at', 'basketitem_set', 'discounted_price', 'discount']
 
+    def get_discount(self, obj):
+        try:
+            code = DiscountCode.objects.filter(code=obj.discount_code).get()
+            return DiscountCodeSerializer(code).data
+        except DiscountCode.DoesNotExist:
+            pass
 
 class CreateBasketItemAndAddToBasketSerializer(serializers.ModelSerializer):
     class Meta:

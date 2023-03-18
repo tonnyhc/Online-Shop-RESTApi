@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.authtoken import models as authtoken_models
 
+from OnlineShopBackEnd.orders.models import DiscountCode
 from OnlineShopBackEnd.products.models import Product
 from OnlineShopBackEnd.shop_basket.models import Basket, BasketItem
 from OnlineShopBackEnd.shop_basket.serializers import BasketSerializer, CreateBasketItemAndAddToBasketSerializer, \
@@ -109,6 +110,79 @@ class RemoveBasketItemFromBasket(rest_generic_views.DestroyAPIView):
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+def apply_discount_code(request):
+    code = request.data.get('code')
+
+    try:
+        user = request.user
+    except ObjectDoesNotExist:
+        return Response({
+            "message": "User does not exist"
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        basket = Basket.objects.get(user=user)
+    except Basket.DoesNotExist:
+        return Response({
+            'message': "Basket does not exist"
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    if not code:
+        return Response({
+            "message": "Please provide a discount code in order to get a discount!"
+        }, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        discount = DiscountCode.objects.filter(code=code).get()
+    except DiscountCode.DoesNotExist:
+        return Response({
+            "message": "The code is not valid!"
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    discount_percentage = discount.discount
+    # Malking calculation for the total cost of the basket
+    basket_cost = sum((item.subtotal() for item in basket.basketitem_set.all()))
+    discounted_cost = basket_cost - (basket_cost * (int(discount_percentage) / 100))
+    basket.discounted_price = discounted_cost
+    basket.discount_code = code
+    basket.save()
+    return Response({
+        'discounted_price': discounted_cost,
+        'discount': {
+            'code': discount.code,
+            'discount': discount.discount
+        }
+    })
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def remove_discount_code(request):
+    try:
+        user = request.user
+    except ObjectDoesNotExist:
+        return Response({
+            "message": "User does not exist"
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        basket = Basket.objects.get(user=user)
+    except Basket.DoesNotExist:
+        return Response({
+            'message': "Basket does not exist"
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    basket.discounted_price = None
+    basket.discount_code = None
+    basket.save()
+    return Response({
+        'message': "Discount code successfully removed"
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def update_basket_item_quantity(request, slug):
     user = request.user
     basket = Basket.objects.get(user=user)
@@ -118,7 +192,7 @@ def update_basket_item_quantity(request, slug):
     except BasketItem.DoesNotExist:
         return Response({
             'message': "Can't update quantity as the basket item seems not to exist!"
-        })
+        }, status=status.HTTP_400_BAD_REQUEST)
 
     try:
         action = request.data.get('action').split(' ')[0]
@@ -131,10 +205,10 @@ def update_basket_item_quantity(request, slug):
     except Exception:
         return Response({
             'message': "An error occurred please try again later."
-        })
+        }, status=status.HTTP_400_BAD_REQUEST)
 
     serializer = BasketItemSerializer(basket_item)
 
     return Response({
         'basket_item': serializer.data
-    })
+    }, status=status.HTTP_200_OK)

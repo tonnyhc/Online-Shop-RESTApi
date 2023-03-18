@@ -90,8 +90,6 @@ class Order(models.Model):
     )
 
 
-
-
 class OrderItem(models.Model):
     MAX_DIGITS_PRICE = 10
 
@@ -116,3 +114,21 @@ class OrderItem(models.Model):
         on_delete=models.CASCADE,
         related_name='items'
     )
+
+
+class DiscountCode(models.Model):
+    MAX_LEN_CODE = 25
+    MIN_LEN_CODE = 3
+    code = models.CharField(
+        max_length=MAX_LEN_CODE,
+        validators=[validators.MinLengthValidator(MIN_LEN_CODE)]
+    )
+    discount = models.IntegerField()
+
+    expiry_date = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+
+    def __str__(self):
+        return self.code
