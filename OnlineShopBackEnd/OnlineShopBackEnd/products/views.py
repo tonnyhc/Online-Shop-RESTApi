@@ -5,8 +5,9 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from OnlineShopBackEnd.products.models import Product, ProductRating, Category
-from OnlineShopBackEnd.products.serializers import ProductSerializer, ProductRatingSerializer, CategorySerializer
+from OnlineShopBackEnd.products.models import Product, ProductRating, Category, FavoriteProducts
+from OnlineShopBackEnd.products.serializers import ProductSerializer, ProductRatingSerializer, CategorySerializer, \
+    FavoriteProductsSerializer
 
 UserModel = get_user_model()
 
@@ -159,3 +160,16 @@ class ProductRateView(rest_generic_views.CreateAPIView):
         # {
         #     "score": "{0 to 5 delimiter 0.5}"
         # }
+
+
+class FavoriteProductsListView(rest_generic_views.ListAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    serializer_class = FavoriteProductsSerializer
+
+    def get_queryset(self):
+        products = FavoriteProducts.objects.filter(user=self.request.user).all()
+        return products
+
+

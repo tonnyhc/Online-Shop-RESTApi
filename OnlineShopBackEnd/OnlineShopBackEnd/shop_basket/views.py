@@ -13,6 +13,7 @@ from OnlineShopBackEnd.products.models import Product
 from OnlineShopBackEnd.shop_basket.models import Basket, BasketItem
 from OnlineShopBackEnd.shop_basket.serializers import BasketSerializer, CreateBasketItemAndAddToBasketSerializer, \
     BasketItemSerializer
+from OnlineShopBackEnd.shop_basket.utils import update_basket_discounted_price
 
 UserModel = get_user_model()
 
@@ -40,7 +41,7 @@ class CreateBasketItemAndAddToBasket(rest_generic_views.CreateAPIView):
 
     queryset = BasketItem.objects.all()
     basket = Basket.objects.all()
-    serializer_class = CreateBasketItemAndAddToBasketSerializer
+    serializer_class = BasketItemSerializer
 
     def create(self, request, *args, **kwargs):
         try:
@@ -88,8 +89,12 @@ class RemoveBasketItemFromBasket(rest_generic_views.DestroyAPIView):
             item = self.queryset.get(basket=basket, product=product)
 
             self.perform_destroy(item)
+
+            discounted_price = update_basket_discounted_price(basket.pk)
+
             return Response({
-                'message': "Product deleted from basket successfully!"
+                'message': "Product deleted from basket successfully!",
+                'discounted_price': discounted_price
             })
         except ObjectDoesNotExist:
             return Response({
@@ -202,6 +207,8 @@ def update_basket_item_quantity(request, slug):
         elif action == '-' and basket_item.quantity > 1:
             basket_item.quantity -= value
         basket_item.save()
+        discounted_cost = update_basket_discounted_price(basket.pk)
+
     except Exception:
         return Response({
             'message': "An error occurred please try again later."
@@ -210,5 +217,6 @@ def update_basket_item_quantity(request, slug):
     serializer = BasketItemSerializer(basket_item)
 
     return Response({
-        'basket_item': serializer.data
+        'basket_item': serializer.data,
+        'discounted_price': discounted_cost
     }, status=status.HTTP_200_OK)

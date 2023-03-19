@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from OnlineShopBackEnd.products.models import Product, ProductRating, Category
+from OnlineShopBackEnd.products.models import Product, ProductRating, Category, FavoriteProducts
 
 
 class ProductRatingSerializer(serializers.ModelSerializer):
@@ -45,3 +45,11 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'
+
+
+class FavoriteProductsSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(many=False)
+
+    class Meta:
+        model = FavoriteProducts
+        fields = ('product', 'id', 'date_added', 'user')

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from OnlineShopBackEnd.products.models import Product, ProductRating, Category
+from OnlineShopBackEnd.products.models import Product, ProductRating, Category, FavoriteProducts
 
 
 # class ProductImageInline(admin.TabularInline):
@@ -23,4 +23,8 @@ class RatingAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(FavoriteProducts)
+class FavoriteProductsAdmin(admin.ModelAdmin):
     pass

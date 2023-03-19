@@ -33,7 +33,6 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
         validators=[validators.MinLengthValidator(MIN_LEN_FULL_NAME),
                     validators.RegexValidator(regex=r'^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.\'-]+$',
                                               message="Please enter a valid full name!")]
-    #     TODO: Create a validator for the full_name to be only with letters
     )
 
     email = models.EmailField(

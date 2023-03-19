@@ -101,6 +101,21 @@ class Product(models.Model):
     def __str__(self):
         return self.brand + ' ' + self.model
 
+
+class FavoriteProducts(models.Model):
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE
+    )
+    user = models.ForeignKey(
+        UserModel,
+        on_delete=models.CASCADE
+    )
+    date_added = models.DateTimeField(
+        auto_now_add=True
+    )
+
+
 # This model is for the images for the products, because i want to have more than 1 image for a single product
 # class ProductImage(models.Model):
 #     product = models.ForeignKey(
