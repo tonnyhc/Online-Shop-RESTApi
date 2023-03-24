@@ -45,11 +45,12 @@ class CreateBasketItemAndAddToBasket(rest_generic_views.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         try:
-            product = Product.objects.filter(slug=request.data['product']).get()
+            requested_slug = kwargs['slug']
+            product = Product.objects.filter(slug=requested_slug).get()
         except Product.DoesNotExist:
             return Response({
                 "message": "The product you are trying to add to your basket does not exist!"
-            })
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             basket = Basket.objects.filter(user=request.user).get()
@@ -58,12 +59,11 @@ class CreateBasketItemAndAddToBasket(rest_generic_views.CreateAPIView):
 
         try:
             basket_item = BasketItem.objects.filter(product=product, basket=basket).get()
-            basket_item.quantity += int(request.data['quantity'])
+            basket_item.quantity += 1
             basket_item.save()
         except BasketItem.DoesNotExist:
             basket_item = BasketItem.objects.create(
                 product=product,
-                quantity=request.data['quantity'],
                 basket=basket,
             )
 

@@ -173,3 +173,53 @@ class FavoriteProductsListView(rest_generic_views.ListAPIView):
         return products
 
 
+class FavoriteProductsRemoveView(rest_generic_views.DestroyAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        product_slug = kwargs['slug']
+        try:
+            product = FavoriteProducts.objects.get(product__slug=product_slug)
+        except FavoriteProducts.DoesNotExist:
+            return Response({
+                'message': "The product you want to remove is not in your favorites list"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if product.user != request.user:
+            return Response({
+                'message': "You can not remove this product, because it is not in your favorites list"
+            }, status=status.HTTP_403_FORBIDDEN)
+        product.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FavoriteProductsCreateView(rest_generic_views.CreateAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def create(self, request, *args, **kwargs):
+        product_slug = kwargs['slug']
+        try:
+            product = Product.objects.get(slug=product_slug)
+        except Product.DoesNotExist:
+            return Response({
+                'message': "The product you want to add to favorites does not exist"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            favorite_product = FavoriteProducts.objects.get(user=request.user,product=product)
+            return Response({
+                "message": "The product is already in your favorites list"
+            }, status=status.HTTP_403_FORBIDDEN)
+        except FavoriteProducts.DoesNotExist:
+            favorite_product = FavoriteProducts.objects.create(
+                product=product,
+                user=request.user
+            )
+            favorite_product.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+
+

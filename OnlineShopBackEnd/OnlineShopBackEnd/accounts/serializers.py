@@ -44,6 +44,7 @@ class AccountInfoSerializer(serializers.ModelSerializer):
 class AccountDetailsSerializer(serializers.ModelSerializer):
     userinfo = AccountInfoSerializer()
     orders_count = serializers.SerializerMethodField()
+    favorites_count = serializers.SerializerMethodField()
 
     class Meta:
         model = UserModel
@@ -51,6 +52,9 @@ class AccountDetailsSerializer(serializers.ModelSerializer):
 
     def get_orders_count(self, obj):
         return obj.order_set.count()
+
+    def get_favorites_count(self, obj):
+        return obj.favoriteproducts_set.count()
 
 
 class AccountEditSerializer(serializers.ModelSerializer):
