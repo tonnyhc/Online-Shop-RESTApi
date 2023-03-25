@@ -8,5 +8,6 @@ urlpatterns = [
         path('products/', include('OnlineShopBackEnd.products.urls')),
         path('basket/', include('OnlineShopBackEnd.shop_basket.urls')),
         path('orders/', include('OnlineShopBackEnd.orders.urls')),
+        path('admin-panel/', include('OnlineShopBackEnd.admin_panel.urls')),
     ]))
 ]

@@ -32,11 +32,11 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     "corsheaders",
 
-    'OnlineShopBackEnd.shop',
     'OnlineShopBackEnd.products',
     'OnlineShopBackEnd.shop_basket',
     'OnlineShopBackEnd.accounts',
     'OnlineShopBackEnd.orders',
+    'OnlineShopBackEnd.admin_panel',
 
 ]
 
