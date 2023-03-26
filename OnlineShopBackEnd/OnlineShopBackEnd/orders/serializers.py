@@ -47,10 +47,11 @@ class EditOrderSerializer(serializers.ModelSerializer):
 
 class ListOrdersSerializer(serializers.ModelSerializer):
     date_of_order = serializers.SerializerMethodField()
+    user_email = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
-        fields = ['id', 'date_of_order', 'total_price', 'order_status']
+        fields = ['id', 'date_of_order', 'total_price', 'order_status', 'user_email', 'full_name']
 
     def get_date_of_order(self, obj):
         date_str = str(obj.order_date)
@@ -58,3 +59,7 @@ class ListOrdersSerializer(serializers.ModelSerializer):
 
         formatted_date = date_obj.strftime('%d %B %Y, %H:%M')
         return formatted_date
+
+    def get_user_email(self, obj):
+        return obj.user.email
+
