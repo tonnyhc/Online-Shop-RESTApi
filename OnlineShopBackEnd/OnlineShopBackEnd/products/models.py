@@ -3,6 +3,8 @@ from django.core import validators
 from django.db import models
 from django.utils.text import slugify
 
+from cloudinary.models import CloudinaryField
+
 from OnlineShopBackEnd.products.mixins import CategoryEnumMixin, GenderEnumMixin
 
 UserModel = get_user_model()
@@ -116,12 +118,9 @@ class FavoriteProducts(models.Model):
     )
 
 
-# This model is for the images for the products, because i want to have more than 1 image for a single product
-# class ProductImage(models.Model):
-#     product = models.ForeignKey(
-#         Product,
-#         on_delete=models.CASCADE,
-#         related_name='images'
-#     )
-#     #TODO: make the image field and ImageField and upload it to some cloud
-#     image = models.URLField()
+class ProductImage(models.Model):
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE
+    )
+    image = CloudinaryField('image')

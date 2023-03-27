@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from OnlineShopBackEnd.products.models import Product, ProductRating, Category, FavoriteProducts
+from OnlineShopBackEnd.products.models import Product, ProductRating, Category, FavoriteProducts, ProductImage
 
 
 class ProductRatingSerializer(serializers.ModelSerializer):
@@ -16,18 +16,41 @@ class ProductSerializerOrderDetails(serializers.ModelSerializer):
         fields = ('brand', 'model', 'product_price', 'discounted_price', 'slug', 'image')
 
 
+class ProductImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProductImage
+        fields = ('image_url', )
+
+    @staticmethod
+    def get_image_url(obj):
+        return obj.image.url
+
 class ProductSerializer(serializers.ModelSerializer):
     average_rating = serializers.SerializerMethodField()
     search = serializers.StringRelatedField()
+    images = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        exclude = ('ratings',)
+        fields = ('id', 'average_rating', 'brand', 'model', 'product_price',
+                  'discounted_price', 'product_id', 'slug', 'quantity', 'image',
+                  'category', 'images', 'search')
+        # exclude = ('ratings',)
 
-    def get_search(self, obj):
+    @staticmethod
+    def get_search(obj):
         return str(obj.product)
 
-    def get_average_rating(self, obj):
+    @staticmethod
+    def get_images(obj):
+        images = obj.productimage_set.all()
+        serializer = ProductImageSerializer(images, many=True)
+        return serializer.data
+
+    @staticmethod
+    def get_average_rating(obj):
         ratings = obj.ratings.all()
         scores = [rating.score for rating in ratings]
         if scores:

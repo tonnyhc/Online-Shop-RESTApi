@@ -1,5 +1,9 @@
 from pathlib import Path
 
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -31,6 +35,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     "corsheaders",
+    'cloudinary',
 
     'OnlineShopBackEnd.products',
     'OnlineShopBackEnd.shop_basket',
@@ -141,3 +146,13 @@ REST_FRAMEWORK = {
     #     'rest_framework.permissions.IsAuthenticated',
     # ]
 }
+
+cloudinary.config(
+    cloud_name="dnb8qwwyi",
+    api_key="487811199239783",
+    api_secret="WAQHEFxwaKpGfANugqxywlZrYCY",
+    secure=True
+)
+
+# MEDIA_URL = "/media/"
+# DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
