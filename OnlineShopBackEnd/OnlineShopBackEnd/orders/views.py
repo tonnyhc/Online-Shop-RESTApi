@@ -29,7 +29,7 @@ class CreateOrder(rest_generic_views.CreateAPIView):
         )
 
         items = request.data.get('items')
-
+        print(items)
         item_objects = []
         for item in items:
             try:
@@ -111,9 +111,6 @@ class OrderDetails(rest_generic_views.RetrieveAPIView):
         return self.retrieve(self, request, *args, **kwargs)
 
 
-
-
-
 class EditOrder(rest_generic_views.UpdateAPIView):
     queryset = Order.objects.all()
     serializer_class = EditOrderSerializer
@@ -132,6 +129,7 @@ class EditOrder(rest_generic_views.UpdateAPIView):
             })
         else:
             return self.update(request, *args, **kwargs)
+
 
 class DeleteOrder(rest_generic_views.DestroyAPIView):
     queryset = Order.objects.all()
@@ -154,4 +152,3 @@ class DeleteOrder(rest_generic_views.DestroyAPIView):
         return Response({
             "message": "You have successfully canceled your order",
         }, status=status.HTTP_204_NO_CONTENT)
-

@@ -81,13 +81,16 @@ class Product(models.Model):
         ProductRating,
         related_name='products',
     )
-    image = models.URLField(
-        blank=True,
-        null=True,
-    )
+
     gender = models.CharField(
         choices=GenderEnumMixin.choices(),
         max_length=GenderEnumMixin.max_len()
+    )
+
+    is_published = models.BooleanField(
+        blank=False,
+        null=False,
+        default=False,
     )
 
     # This 2 are for the slug field. The first one generates the slug out of title and product_id

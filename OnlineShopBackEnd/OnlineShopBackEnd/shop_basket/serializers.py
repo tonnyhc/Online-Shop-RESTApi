@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from OnlineShopBackEnd.orders.models import DiscountCode
+from OnlineShopBackEnd.products.serializers import ProductImageSerializer
 from OnlineShopBackEnd.shop_basket.models import Basket, BasketItem
 
 
@@ -24,7 +25,8 @@ class BasketItemSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_image(obj):
-        return obj.product.image
+        image = obj.product.productimage_set.all()[0]
+        return ProductImageSerializer(image).data
 
     @staticmethod
     def get_slug(obj):

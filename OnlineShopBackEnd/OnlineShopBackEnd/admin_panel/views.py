@@ -1,4 +1,4 @@
-
+from django.db import DatabaseError
 from rest_framework import generics as rest_generic_views, status
 from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework.permissions import IsAuthenticated
@@ -11,6 +11,53 @@ from OnlineShopBackEnd.admin_panel.utils import IsStaffPermission
 from OnlineShopBackEnd.orders.models import Order
 from OnlineShopBackEnd.orders.serializers import ListOrdersSerializer
 from OnlineShopBackEnd.products.models import Product, ProductImage, Category
+from OnlineShopBackEnd.products.serializers import ProductSerializer, CategorySerializer
+
+
+class GetCategories(rest_generic_views.ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+    def get(self, request, *args, **kwargs):
+        final_list = []
+        for category in self.queryset.all():
+            final_list.append({
+                'id': category.id,
+                'category': category.category,
+                'total_products': category.product_set.count(),
+            })
+        return Response(
+            final_list, status=status.HTTP_200_OK)
+
+
+class AddCategoryView(rest_generic_views.CreateAPIView):
+    permission_classes = [IsAuthenticated, IsStaffPermission]
+    queryset = Category.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        category_name = request.data.get('category')
+
+        if self.queryset.filter(category=category_name):
+            return Response({
+                'message': "There is already a category with that name"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            category = Category.objects.create(category=category_name)
+            category.save()
+            return Response({
+                'id': category.id,
+                'category': category.category,
+                'total_products': 0
+            }, status=status.HTTP_200_OK)
+        except DatabaseError:
+            return Response({
+                'message': 'A problem occured. Please try again!'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeleteCategoryView(rest_generic_views.DestroyAPIView):
+    queryset = Category.objects.all()
+
 
 
 class GetDashboardView(rest_generic_views.ListAPIView):
@@ -94,5 +141,29 @@ class AddProductView(rest_generic_views.CreateAPIView):
     a = 5
 
 
+class ProductsListView(rest_generic_views.ListAPIView):
+    permission_classes = [IsAuthenticated, IsStaffPermission]
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
 
 
+class DeleteProductView(rest_generic_views.DestroyAPIView):
+    permission_classes = [IsAuthenticated, IsStaffPermission]
+    queryset = Product.objects.all()
+    lookup_field = 'slug'
+
+
+class EditProductView(rest_generic_views.UpdateAPIView):
+    permission_classes = [IsAuthenticated, IsStaffPermission]
+    parser_classes = [
+        JSONParser,
+        MultiPartParser,
+    ]
+    products_queryset = Product.objects.all()
+    images_queryset = ProductImage.objects.all()
+    lookup_field = 'slug'
+
+    def put(self, request, *args, **kwargs):
+        # TODO
+        data = request.data
+        a = 5

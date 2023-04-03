@@ -31,7 +31,7 @@ class SignUpView(rest_generic_views.CreateAPIView):
             return Response({
                 'token': token.key,
                 'user_id': user.pk,
-                'username': user.username
+                'username': user.username,
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -48,6 +48,7 @@ class SignInView(authtoken_views.ObtainAuthToken):
             "token": token.key,
             'user_id': user.pk,
             'username': user.username,
+            'isStaff': user.is_staff
         })
 
 

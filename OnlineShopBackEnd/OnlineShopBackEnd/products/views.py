@@ -92,7 +92,7 @@ class ProductsListView(rest_generic_views.ListAPIView):
         elif gender:
             queryset = queryset.filter(gender=gender)
 
-        products = queryset
+        products = queryset.filter(is_published=True).all()
         categories = Category.objects.filter(product__in=products).distinct()
 
         for product in products:
