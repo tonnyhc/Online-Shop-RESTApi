@@ -3,7 +3,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from OnlineShopBackEnd.orders.models import Order, OrderItem
+from OnlineShopBackEnd.orders.models import Order, OrderItem, DiscountCode
 from OnlineShopBackEnd.orders.serializers import CreateOrderSerializer, ListOrdersSerializer, OrderDetailsSerializer, \
     EditOrderSerializer
 from OnlineShopBackEnd.products.models import Product
@@ -28,20 +28,15 @@ class CreateOrder(rest_generic_views.CreateAPIView):
             post_code=request.data.get('post_code'),
         )
 
-        items = request.data.get('items')
-        print(items)
+        basket = request.user.basket_set.get()
+        basket_items = basket.basketitem_set.all()
         item_objects = []
-        for item in items:
-            try:
-                product = Product.objects.get(slug=item['slug'])
-            except Product.DoesNotExist:
-                return Response({
-                    "Can not create order as some of the products do not exist!"
-                })
+        for item in basket_items:
+            product = item.product
 
             order_item = OrderItem(
                 product=product,
-                quantity=int(item['quantity']),
+                quantity=int(item.quantity),
                 price=(product.discounted_price if product.discounted_price else product.product_price),
                 order=order
             )
@@ -49,9 +44,21 @@ class CreateOrder(rest_generic_views.CreateAPIView):
 
         OrderItem.objects.bulk_create(item_objects)
         order.total_price = sum(item.price for item in item_objects)
+
+        if basket.discount_code:
+            try:
+                discount = DiscountCode.objects.filter(code=basket.discount_code).get()
+            except DiscountCode.DoesNotExist:
+                return Response({
+                    'message': "You can't make order with this discount code. Please remove it or type another if you have."
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+
+            order.discount = discount
+            order.discounted_price = order.total_price - (order.total_price * int(discount.discount) / 100)
+
         order.save()
 
-        basket = Basket.objects.get(user=request.user)
         basket.delete()
 
         serializer = self.get_serializer(order)
@@ -84,7 +91,7 @@ class OrdersList(rest_generic_views.ListAPIView):
 
     def get(self, request, *args, **kwargs):
         user = request.user
-        orders = self.queryset.filter(user=user)
+        orders = self.queryset.filter(user=user).order_by('-order_date')
 
         return Response(self.serializer_class(orders, many=True).data)
 

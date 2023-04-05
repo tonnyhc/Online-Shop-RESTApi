@@ -10,6 +10,24 @@ from OnlineShopBackEnd.products.models import Product
 UserModel = get_user_model()
 
 
+class DiscountCode(models.Model):
+    MAX_LEN_CODE = 25
+    MIN_LEN_CODE = 3
+    code = models.CharField(
+        max_length=MAX_LEN_CODE,
+        validators=[validators.MinLengthValidator(MIN_LEN_CODE)]
+    )
+    discount = models.IntegerField()
+
+    expiry_date = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+
+    def __str__(self):
+        return self.code
+
+
 class Order(models.Model):
     MAX_LEN_FULL_NAME = 120
     MAX_LEN_PHONE_NUMBER = 10
@@ -83,11 +101,24 @@ class Order(models.Model):
         null=False
     )
 
+    discount = models.ForeignKey(
+        DiscountCode,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
+
+    discounted_price = models.FloatField(
+        blank=True,
+        null=True
+    )
+
     order_status = models.CharField(
         choices=OrderStatusEnumMixin.choices(),
         max_length=OrderStatusEnumMixin.max_len(),
         default='InPreparation'
     )
+
 
 
 class OrderItem(models.Model):
@@ -116,19 +147,3 @@ class OrderItem(models.Model):
     )
 
 
-class DiscountCode(models.Model):
-    MAX_LEN_CODE = 25
-    MIN_LEN_CODE = 3
-    code = models.CharField(
-        max_length=MAX_LEN_CODE,
-        validators=[validators.MinLengthValidator(MIN_LEN_CODE)]
-    )
-    discount = models.IntegerField()
-
-    expiry_date = models.DateTimeField(
-        blank=True,
-        null=True
-    )
-
-    def __str__(self):
-        return self.code

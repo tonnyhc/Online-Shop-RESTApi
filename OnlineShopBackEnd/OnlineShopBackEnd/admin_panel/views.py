@@ -9,7 +9,7 @@ import cloudinary.uploader
 from OnlineShopBackEnd.admin_panel.serializer import AddProductSerializer
 from OnlineShopBackEnd.admin_panel.utils import IsStaffPermission
 from OnlineShopBackEnd.orders.models import Order
-from OnlineShopBackEnd.orders.serializers import ListOrdersSerializer
+from OnlineShopBackEnd.orders.serializers import ListOrdersSerializer, OrderDetailsSerializer
 from OnlineShopBackEnd.products.models import Product, ProductImage, Category
 from OnlineShopBackEnd.products.serializers import ProductSerializer, CategorySerializer
 
@@ -57,7 +57,6 @@ class AddCategoryView(rest_generic_views.CreateAPIView):
 
 class DeleteCategoryView(rest_generic_views.DestroyAPIView):
     queryset = Category.objects.all()
-
 
 
 class GetDashboardView(rest_generic_views.ListAPIView):
@@ -167,3 +166,19 @@ class EditProductView(rest_generic_views.UpdateAPIView):
         # TODO
         data = request.data
         a = 5
+
+
+class OrdersListView(rest_generic_views.ListAPIView):
+    permission_classes = [IsAuthenticated, IsStaffPermission]
+    queryset = Order.objects.all()
+    serializer_class = ListOrdersSerializer
+
+    def get(self, request, *args, **kwargs):
+        orders = self.queryset.order_by('-order_date')
+
+        return Response(self.serializer_class(orders, many=True).data)
+
+class OrderDetailsView(rest_generic_views.RetrieveAPIView):
+    permission_classes = [IsAuthenticated, IsStaffPermission]
+    queryset = Order.objects.all()
+    serializer_class = OrderDetailsSerializer
