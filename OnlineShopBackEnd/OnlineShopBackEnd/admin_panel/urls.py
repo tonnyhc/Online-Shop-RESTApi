@@ -2,7 +2,7 @@ from django.urls import path, include
 
 from OnlineShopBackEnd.admin_panel.views import GetDashboardView, AddProductView, ProductsListView, DeleteProductView, \
     EditProductView, GetCategories, AddCategoryView, DeleteCategoryView, OrdersListView, OrderDetailsView, \
-    change_order_status, DiscountCodeListView, CreateDiscountCodeView
+    change_order_status, DiscountCodeListView, CreateDiscountCodeView, GetCustomersListView
 
 urlpatterns = (
     path('dashboard/', GetDashboardView.as_view(), name='dashboard view'),
@@ -23,5 +23,8 @@ urlpatterns = (
     path('discounts/', include([
         path('', DiscountCodeListView.as_view(), name='discount code list'),
         path('create-discount/', CreateDiscountCodeView.as_view(), name='create discount code'),
-    ]))
+    ])),
+    path('customers/', include([
+        path('', GetCustomersListView.as_view(), name='customers list view'),
+    ])),
 )

@@ -1,9 +1,12 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from datetime import datetime
 
 from OnlineShopBackEnd.orders.models import Order, OrderItem, DiscountCode
 from OnlineShopBackEnd.products.serializers import ProductSerializerOrderDetails
+
+UserModel = get_user_model()
 
 
 class CreateOrderSerializer(serializers.ModelSerializer):
@@ -32,12 +35,11 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
     date_of_order = serializers.SerializerMethodField()
     email = serializers.SerializerMethodField()
 
-
     class Meta:
         model = Order
         fields = (
             'full_name', 'phone_number', 'email', 'town', 'address', 'post_code', 'items',
-            'date_of_order', 'shipping_date', 'total_price', 'discounted_price', 'order_status', 'discount','id'
+            'date_of_order', 'shipping_date', 'total_price', 'discounted_price', 'order_status', 'discount', 'id'
         )
 
     @staticmethod
@@ -94,3 +96,6 @@ class ListOrdersSerializer(serializers.ModelSerializer):
 
     def get_user_email(self, obj):
         return obj.user.email
+
+
+

@@ -1,6 +1,16 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from OnlineShopBackEnd.orders.models import DiscountCode
+from OnlineShopBackEnd.products.models import Product
+
+
+UserModel = get_user_model()
+
+class AddProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        exclude = ('slug',)
 
 
 class OrderAdminSerializer(serializers.ModelSerializer):
@@ -39,5 +49,23 @@ class DiscountCodeCreateAdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = DiscountCode
         fields = ('code', 'discount', 'expiry_date')
+
+
+class UserModelSerializer(serializers.ModelSerializer):
+    total_orders = serializers.SerializerMethodField()
+    total_income = serializers.SerializerMethodField()
+
+    class Meta:
+        model = UserModel
+        fields = ('id', 'username', 'email', 'full_name','gender', 'total_orders', 'total_income')
+
+    @staticmethod
+    def get_total_orders(obj):
+        return obj.order_set.count()
+
+    @staticmethod
+    def get_total_income(obj):
+        orders = obj.order_set.all()
+        return sum([order.discounted_price or order.total_price for order in orders])
 
 

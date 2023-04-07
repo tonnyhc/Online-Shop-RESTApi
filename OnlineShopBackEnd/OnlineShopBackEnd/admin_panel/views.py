@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db import DatabaseError, IntegrityError
 from rest_framework import generics as rest_generic_views, status
 from rest_framework.authentication import TokenAuthentication
@@ -8,14 +9,16 @@ from rest_framework.response import Response
 
 import cloudinary.uploader
 
-from OnlineShopBackEnd.admin_panel.serializer import AddProductSerializer
-from OnlineShopBackEnd.admin_panel.serializers import DiscountCodeAdminSerializer
+
+from OnlineShopBackEnd.admin_panel.serializers import DiscountCodeAdminSerializer, AddProductSerializer, UserModelSerializer
 from OnlineShopBackEnd.admin_panel.utils import IsStaffPermission
 from OnlineShopBackEnd.orders.models import Order, DiscountCode
 from OnlineShopBackEnd.orders.serializers import ListOrdersSerializer, OrderDetailsSerializer, DiscountCodeSerializer
 from OnlineShopBackEnd.products.models import Product, ProductImage, Category
 from OnlineShopBackEnd.products.serializers import ProductSerializer, CategorySerializer
 
+
+UserModel = get_user_model()
 
 class GetCategories(rest_generic_views.ListAPIView):
     queryset = Category.objects.all()
@@ -68,7 +71,7 @@ class GetDashboardView(rest_generic_views.ListAPIView):
     queryset = Order.objects.all()
 
     def get(self, request, *args, **kwargs):
-        total_sales = sum([order.total_price for order in self.queryset.all()])
+        total_sales = sum([order.discounted_price or order.total_price for order in self.queryset.all()])
         total_orders = self.queryset.count()
         total_products = Product.objects.count()
         orders = []
@@ -213,6 +216,12 @@ class CreateDiscountCodeView(rest_generic_views.CreateAPIView):
 
 
         return Response(self.list_serializer(discount_code).data, status=status.HTTP_201_CREATED)
+
+
+class GetCustomersListView(rest_generic_views.ListAPIView):
+    permission_classes = [IsAuthenticated, IsStaffPermission]
+    queryset = UserModel.objects.all()
+    serializer_class = UserModelSerializer
 
 
 
