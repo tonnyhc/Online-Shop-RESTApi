@@ -14,6 +14,7 @@ class DiscountCode(models.Model):
     MAX_LEN_CODE = 25
     MIN_LEN_CODE = 3
     code = models.CharField(
+        unique=True,
         max_length=MAX_LEN_CODE,
         validators=[validators.MinLengthValidator(MIN_LEN_CODE)]
     )

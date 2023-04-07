@@ -1,7 +1,8 @@
 from django.urls import path, include
 
 from OnlineShopBackEnd.admin_panel.views import GetDashboardView, AddProductView, ProductsListView, DeleteProductView, \
-    EditProductView, GetCategories, AddCategoryView, DeleteCategoryView, OrdersListView, OrderDetailsView
+    EditProductView, GetCategories, AddCategoryView, DeleteCategoryView, OrdersListView, OrderDetailsView, \
+    change_order_status, DiscountCodeListView, CreateDiscountCodeView
 
 urlpatterns = (
     path('dashboard/', GetDashboardView.as_view(), name='dashboard view'),
@@ -17,6 +18,10 @@ urlpatterns = (
     path('orders/', include([
         path('', OrdersListView.as_view(), name='orders list'),
         path('<int:pk>/', OrderDetailsView.as_view(), name='order details'),
-
+        path('<int:pk>/change-status/', change_order_status, name='change order status'),
+    ])),
+    path('discounts/', include([
+        path('', DiscountCodeListView.as_view(), name='discount code list'),
+        path('create-discount/', CreateDiscountCodeView.as_view(), name='create discount code'),
     ]))
 )
