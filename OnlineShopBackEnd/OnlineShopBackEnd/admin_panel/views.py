@@ -171,8 +171,55 @@ class EditProductView(rest_generic_views.UpdateAPIView):
     def put(self, request, *args, **kwargs):
         # TODO
         data = request.data
-        a = 5
+        try:
+            product = Product.objects.get(slug=kwargs['slug'])
 
+        except Product.DoesNotExist:
+            return Response({
+                'message': "The product you are trying to update does not exist!"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        brand = data.get('brand')
+        model = data.get('model')
+        gender = data.get('gender')
+        product_price = data.get('product_price')
+        discounted_price = data.get('discounted_price')
+        is_published = request.data.get('is_published')
+
+
+        if not discounted_price:
+            discounted_price = product.discounted_price
+        else:
+            discounted_price = float(discounted_price)
+        if not product_price:
+            product_price = product.product_price
+        else:
+            product_price = float(product_price)
+
+        try:
+            category = Category.objects.get(category=data.get('category'))
+        except Category.DoesNotExist:
+            return Response({
+                'message': "You are trying to apply category that does not exist"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if is_published == 'true':
+            is_published = True
+        elif is_published == 'false':
+            is_published = False
+        else:
+            is_published = product.is_published
+
+        product.brand = brand or product.brand
+        product.model = model or product.model
+        product.gender = gender or product.gender
+        product.product_price = product_price
+        product.discounted_price = discounted_price
+        product.category = category or product.category
+        product.is_published = is_published
+        product.save()
+        return Response(
+            ProductSerializer(product).data, status=status.HTTP_200_OK
+        )
 
 class OrdersListView(rest_generic_views.ListAPIView):
     permission_classes = [IsAuthenticated, IsStaffPermission]
